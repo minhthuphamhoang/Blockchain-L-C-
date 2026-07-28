@@ -1,0 +1,7 @@
+COMMERCIAL INVOICE — TEST DATA ONLY
+Invoice No: INV-RMIT-001
+Exporter: Vietnam Cashew Exporter Ltd.
+Importer: Australia Food Importer Pty Ltd.
+Goods: 500 cartons of processed cashew nuts
+Amount: USD 100,000
+This file is fictional and is provided only to demonstrate off-chain SHA-256 hashing.

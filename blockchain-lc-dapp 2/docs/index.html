@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Blockchain Letter of Credit and electronic Bill of Lading testnet prototype" />
+  <title>TradeTrust LC — Sepolia Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">BLOCKCHAIN TRADE FINANCE PROTOTYPE</p>
+      <h1>TradeTrust LC</h1>
+      <p class="subtitle">Letter of Credit + electronic Bill of Lading on Sepolia</p>
+    </div>
+    <button id="connectButton" class="primary">Connect MetaMask</button>
+  </header>
+
+  <main>
+    <section class="status-grid">
+      <article class="status-card">
+        <span>Network</span>
+        <strong id="networkStatus">Not connected</strong>
+      </article>
+      <article class="status-card">
+        <span>Wallet</span>
+        <strong id="walletStatus">Not connected</strong>
+      </article>
+      <article class="status-card">
+        <span>Contract</span>
+        <strong id="contractStatus">Not configured</strong>
+      </article>
+      <article class="status-card">
+        <span>Demo mode</span>
+        <strong id="demoModeStatus">Unknown</strong>
+      </article>
+    </section>
+
+    <section class="card role-card">
+      <div>
+        <p class="eyebrow">ROLE-BASED INTERFACE</p>
+        <h2>Choose the organisation you are acting as</h2>
+        <p class="muted">The selection changes the visible dashboard. The smart contract still checks the connected wallet’s on-chain role.</p>
+      </div>
+      <div class="role-controls">
+        <select id="roleSelect" aria-label="Choose role">
+          <option value="1">Importer</option>
+          <option value="2">Exporter</option>
+          <option value="3">Issuing Bank</option>
+          <option value="4">Advising Bank</option>
+          <option value="5">Carrier</option>
+          <option value="6">Port Operator</option>
+        </select>
+        <button id="claimRoleButton" class="secondary">Claim selected role</button>
+        <span id="rolePermission" class="pill">Role not checked</span>
+      </div>
+    </section>
+
+    <section class="workflow card">
+      <p class="eyebrow">END-TO-END WORKFLOW</p>
+      <div class="steps">
+        <span>1. Request</span><span>2. Issue</span><span>3. Accept</span><span>4. eBL</span>
+        <span>5. Documents</span><span>6. Review</span><span>7. Pay</span><span>8. Release</span>
+      </div>
+    </section>
+
+    <section id="roleDashboard" class="dashboard-grid">
+      <article class="card role-section" data-role="1">
+        <h2>Importer — Request a Letter of Credit</h2>
+        <form id="requestLCForm">
+          <label>Exporter wallet<input id="exporterAddress" required placeholder="0x..." /></label>
+          <label>Issuing bank wallet<input id="issuingBankAddress" required placeholder="0x..." /></label>
+          <label>Advising bank wallet<input id="advisingBankAddress" required placeholder="0x..." /></label>
+          <label>Carrier wallet<input id="carrierAddress" required placeholder="0x..." /></label>
+          <button type="button" id="fillMyAddressButton" class="ghost">Use connected wallet for all demo parties</button>
+          <div class="two-column">
+            <label>Amount<input id="lcAmount" type="number" min="1" required value="100000" /></label>
+            <label>Currency<input id="lcCurrency" maxlength="8" required value="USD" /></label>
+          </div>
+          <label>Goods description<textarea id="goodsDescription" required>500 cartons of processed cashew nuts</textarea></label>
+          <label>Expiry date<input id="expiryDate" type="datetime-local" required /></label>
+          <button class="primary" type="submit">Request L/C</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="3">
+        <h2>Issuing Bank — Manage the L/C</h2>
+        <form class="action-form" data-contract-action="issueLC">
+          <label>L/C ID<input name="lcId" type="number" min="1" required /></label>
+          <button class="primary">Issue L/C</button>
+        </form>
+        <form class="action-form" data-contract-action="authorisePayment">
+          <label>L/C ID<input name="lcId" type="number" min="1" required /></label>
+          <button class="primary">Authorise payment</button>
+        </form>
+        <form class="action-form" data-contract-action="markPaid">
+          <label>L/C ID<input name="lcId" type="number" min="1" required /></label>
+          <button class="primary">Record payment completed</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="2">
+        <h2>Exporter — Accept and Present Documents</h2>
+        <form class="action-form" data-contract-action="acceptLC">
+          <label>L/C ID<input name="lcId" type="number" min="1" required /></label>
+          <button class="primary">Accept L/C</button>
+        </form>
+        <form id="submitDocumentForm">
+          <label>L/C ID<input id="documentLcId" type="number" min="1" required /></label>
+          <label>Document type
+            <select id="documentType">
+              <option value="0">Commercial Invoice</option>
+              <option value="1">Packing List</option>
+              <option value="2">Certificate of Origin</option>
+              <option value="3">Insurance Certificate</option>
+              <option value="4">Bill of Lading</option>
+              <option value="5">Inspection Certificate</option>
+              <option value="6">Other</option>
+            </select>
+          </label>
+          <label>Select off-chain file<input id="documentFile" type="file" required /></label>
+          <label>Storage reference<input id="documentStorageReference" placeholder="ipfs://CID or secure-database://record" /></label>
+          <button class="primary" type="submit">Hash file and submit evidence</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="3,4">
+        <h2>Bank — Documentary Review</h2>
+        <form class="action-form" data-contract-action="startDocumentReview">
+          <label>L/C ID<input name="lcId" type="number" min="1" required /></label>
+          <button class="primary">Start document review</button>
+        </form>
+        <form id="reviewDocumentForm">
+          <label>Document ID<input id="reviewDocumentId" type="number" min="1" required /></label>
+          <label>Decision
+            <select id="documentVerified"><option value="true">Verified</option><option value="false">Rejected</option></select>
+          </label>
+          <label>Review note<textarea id="documentReviewNote">Hash and presented data checked by bank officer.</textarea></label>
+          <button class="primary">Record document review</button>
+        </form>
+        <form id="completeReviewForm">
+          <label>L/C ID<input id="completeReviewLcId" type="number" min="1" required /></label>
+          <label>Overall decision
+            <select id="lcCompliant"><option value="true">Compliant</option><option value="false">Discrepant</option></select>
+          </label>
+          <label>Decision note<textarea id="complianceNote">Documentary presentation complies with the L/C terms.</textarea></label>
+          <button class="primary">Complete review</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="5">
+        <h2>Carrier — Issue Electronic Bill of Lading</h2>
+        <form id="issueEblForm">
+          <label>L/C ID<input id="eblLcId" type="number" min="1" required /></label>
+          <label>Select off-chain eBL file<input id="eblFile" type="file" required /></label>
+          <label>Storage reference<input id="eblStorageReference" placeholder="ipfs://CID or secure-database://record" /></label>
+          <label>Cargo description<input id="eblCargoDescription" value="500 cartons of processed cashew nuts" required /></label>
+          <label>Vessel<input id="vessel" value="MV RMIT Trader" required /></label>
+          <div class="two-column">
+            <label>Port of loading<input id="portLoading" value="Cat Lai Port, Vietnam" required /></label>
+            <label>Port of discharge<input id="portDischarge" value="Port of Melbourne, Australia" required /></label>
+          </div>
+          <button class="primary">Hash file and issue eBL</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="1,2,3,4,5,6">
+        <h2>eBL Holder Actions</h2>
+        <form id="transferEblForm">
+          <label>eBL ID<input id="transferEblId" type="number" min="1" required /></label>
+          <label>New holder wallet<input id="newHolderAddress" placeholder="0x..." required /></label>
+          <button class="primary">Transfer control of eBL</button>
+        </form>
+        <form class="action-form" data-contract-action="requestCargoRelease">
+          <label>eBL ID<input name="eblId" type="number" min="1" required /></label>
+          <button class="primary">Request cargo release</button>
+        </form>
+      </article>
+
+      <article class="card role-section" data-role="5,6">
+        <h2>Carrier / Port Operator — Release Cargo</h2>
+        <form class="action-form" data-contract-action="releaseCargo">
+          <label>eBL ID<input name="eblId" type="number" min="1" required /></label>
+          <button class="primary">Confirm cargo released</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="dashboard-grid explorer-grid">
+      <article class="card">
+        <h2>Inspect Letter of Credit</h2>
+        <form id="loadLcForm" class="inline-form">
+          <input id="loadLcId" type="number" min="1" placeholder="L/C ID" required />
+          <button class="secondary">Load</button>
+        </form>
+        <pre id="lcOutput">No L/C loaded.</pre>
+      </article>
+      <article class="card">
+        <h2>Inspect Document</h2>
+        <form id="loadDocumentForm" class="inline-form">
+          <input id="loadDocumentId" type="number" min="1" placeholder="Document ID" required />
+          <button class="secondary">Load</button>
+        </form>
+        <pre id="documentOutput">No document loaded.</pre>
+      </article>
+      <article class="card">
+        <h2>Inspect eBL</h2>
+        <form id="loadEblForm" class="inline-form">
+          <input id="loadEblId" type="number" min="1" placeholder="eBL ID" required />
+          <button class="secondary">Load</button>
+        </form>
+        <pre id="eblOutput">No eBL loaded.</pre>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="log-header">
+        <div><p class="eyebrow">TRANSACTION ACTIVITY</p><h2>Interface log</h2></div>
+        <button id="clearLogButton" class="ghost">Clear</button>
+      </div>
+      <div id="activityLog" class="activity-log"><p>Connect MetaMask to begin.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    Educational prototype. No real funds, confidential documents, or private keys should be used.
+  </footer>
+
+  <script src="contract-config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+ELECTRONIC BILL OF LADING — TEST DATA ONLY
+eBL No: EBL-RMIT-001
+Shipper: Vietnam Cashew Exporter Ltd.
+Consignee: Australia Food Importer Pty Ltd.
+Carrier: RMIT Demo Shipping Line
+Vessel: MV RMIT Trader
+Port of Loading: Cat Lai Port, Vietnam
+Port of Discharge: Port of Melbourne, Australia
+Cargo: 500 cartons of processed cashew nuts
+This file is fictional and is provided only to demonstrate off-chain SHA-256 hashing.
